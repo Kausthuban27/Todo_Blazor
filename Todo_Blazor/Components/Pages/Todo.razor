@@ -1,0 +1,73 @@
+﻿@page "/todo"
+@rendermode InteractiveServer
+
+<PageTitle>ToDo App</PageTitle>
+
+<div class="container">
+    <div class="brand-title">TASKS</div>
+    <input @bind="newItem" class="inputs" placeholder="Enter your tasks" />
+    @if (newItem != null)
+    {
+        <button @onclick="AddTasks">Add Task</button>
+    }
+
+    <div>
+        @if (TodoItems.Any())
+        {
+            <table>
+                <thead>
+                    <tr>
+                        <th>Select</th>
+                        <th>Task Name</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var item in TodoItems)
+                    {
+                        <tr>
+                            <td><input class="form-check-input" type="checkbox" @bind="@item.IsDone" /></td>
+                            <td>@item.TaskName</td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+            <div class="behaviours">
+                <button @onclick="RemoveTasks">Remove</button>
+                <button @onclick="SortTasks">Sort</button>
+            </div>
+        }
+        else
+        {
+            <p>No tasks available.</p>
+        }
+    </div>
+</div>
+
+@code
+{
+    List<TodoList> TodoItems = new List<TodoList>();
+    string newItem = "";
+
+    public class TodoList
+    {
+        public string TaskName { get; set; }
+        public bool IsDone { get; set; }
+    }
+
+    private void AddTasks(MouseEventArgs e)
+    {
+        if (!string.IsNullOrWhiteSpace(newItem))
+        {
+            TodoItems.Add(new TodoList { TaskName = newItem });
+            newItem = "";
+        }
+    }
+    private void RemoveTasks(MouseEventArgs e)
+    {
+        TodoItems.RemoveAll(item => item.IsDone);
+    }
+    private void SortTasks(MouseEventArgs e)
+    {
+        TodoItems = TodoItems.OrderBy(task => task.TaskName).ToList();
+    }
+}

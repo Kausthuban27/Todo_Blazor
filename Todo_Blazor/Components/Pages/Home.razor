@@ -1,0 +1,60 @@
+﻿@page "/"
+@rendermode InteractiveServer
+@inject NavigationManager navigator
+
+<PageTitle>Home</PageTitle>
+
+
+<h1 class="text-center">Welcome to Todo App</h1>
+
+<div class="form-container" align="center">
+    <EditForm Model="user" FormName="UserLogin" class="form-group w-50" OnSubmit="LoginUser">
+        <div class="mb-3">
+            <label for="username" class="form-label">Username:</label>
+            <input class="form-control" type="text" id="username" @bind-value=user.Username placeholder="Enter the Username" required />
+        </div>
+        <div class="mb-3">
+            <label for="password" class="form-label">Password:</label>
+            <input class="form-control" type="password" id="password" @bind-value=user.Password placeholder="Enter the Password" required />
+        </div>
+        <button class="btn btn-primary" type="submit">Submit</button>
+    </EditForm>
+
+    @message
+</div>
+
+
+
+@code
+{
+    public class User
+    {
+        public string Username { get; set; } = "";
+        public string Password { get; set; } = "";
+    }
+    string message = "";
+    bool IsValid = false;
+
+    public User user = new();
+    private void LoginUser()
+    {
+        var username = user.Username;
+        var password = user.Password;
+
+        if (username != null && password != null)
+        {
+            if (username == "admin" && password == "123")
+            {
+                IsValid = !IsValid;
+                if (navigator != null)
+                {
+                    navigator.NavigateTo("/todo");
+                }
+                else
+                {
+                    message = "Hello";
+                }
+            }
+        }
+    }
+}
