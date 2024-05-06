@@ -12,8 +12,8 @@ using TodoAPI.Model;
 namespace TodoAPI.Migrations
 {
     [DbContext(typeof(TodoDbContext))]
-    [Migration("20240506044813_InitialDbcCreate")]
-    partial class InitialDbcCreate
+    [Migration("20240506144723_InitialCreate")]
+    partial class InitialCreate
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -32,6 +32,9 @@ namespace TodoAPI.Migrations
                         .HasColumnType("int");
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<bool>("IsDone")
+                        .HasColumnType("bit");
 
                     b.Property<DateTime>("ModifiedAt")
                         .HasColumnType("datetime2");

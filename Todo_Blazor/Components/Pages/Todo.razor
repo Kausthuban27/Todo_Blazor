@@ -37,11 +37,8 @@
                         @foreach (var item in TodoItems)
                         {
                             <tr>
-                                <td><input class="form-check-input" type="checkbox" @bind="@item.IsDone"/></td>
-                                @foreach(var task in TodoDatas)
-                                {
-                                    <td>@task.TaskName</td>
-                                }
+                                <td><input class="form-check-input" type="checkbox" @bind="@item.IsDone" @bind:event="onchange" @onclick="@(() => UpdateTaskStatus(item))"/></td>
+                                <td>@item.TaskName</td>
                             </tr>
                         }
                     </tbody>
@@ -62,76 +59,81 @@
 
 @code
 {
-    List<TodoList> TodoItems = new List<TodoList>();
-    List<TodoData> TodoDatas = new List<TodoData>();
-    public string message = "";
-    public class TodoList
-    {
-        public string TaskName { get; set; } = null!;
-        public bool IsDone { get; set; }
-    }
-    public class TodoTasks
-    {
-        public string TaskName { get; set; } = null!;
-        public string Username { get; set; } = "";
-    }
+    public string TaskName { get; set; } = null!;
     public class TodoData
     {
         public int Id { get; set; }
         public string TaskName { get; set; } = null!;
         public string Username { get; set; } = null!;
+        public bool IsDone { get; set; } = false;
         public DateTime ModifiedAt { get; set; }
     }
+    string message = "";
+    List<TodoData> TodoItems = new List<TodoData>();
 
-    public string TaskName { get; set; } = null!;
-    public string Username { get; set; } = "";
-    protected override void OnInitialized()
+    protected override async Task OnInitializedAsync()
     {
-        Username = userStateService.Username; 
+        await GetTasks();
     }
 
-    private async Task GetTask()
+    private async Task GetTasks()
     {
         try
         {
-            var res = await httpClient.GetFromJsonAsync<List<TodoData>>($"http://localhost:5075/Todo/GetTasks?username={Username}");
+            var response = await httpClient.GetFromJsonAsync<List<TodoData>>($"http://localhost:5075/Todo/GetTasks?username={userStateService.Username}");
+            TodoItems = response;
         }
         catch(Exception e)
         {
-            message = $"Error Occurred {e}";
+            message = $"Error occured {e}";
         }
     }
 
 
     private async Task AddTasks()
     {
-        var TodoTasks = new TodoTasks { TaskName = TaskName, Username = Username};
-        try
+        var newTask = new TodoData { TaskName = TaskName, Username = userStateService.Username };
+        var response = await httpClient.PostAsJsonAsync("http://localhost:5075/Todo/AddTasks", newTask);
+        if (response.IsSuccessStatusCode)
         {
-            var res = await httpClient.PostAsJsonAsync("http://localhost:5075/Todo/AddTasks", TodoTasks);
-            if(res.IsSuccessStatusCode)
-            {
-                TodoItems.Add(new TodoList {TaskName = TaskName});
-            }
-            else
-            {
-                message = "Failed to add task. Please try again.";
-            }
-        }
-        catch(Exception e)
-        {
-            message = $"Error Occured: {e}";
+            TodoItems.Add(newTask);
+            TaskName = ""; 
         }
     }
 
-    private void RemoveTasks(MouseEventArgs e)
+    private async Task UpdateTaskStatus(TodoData task)
     {
-        TodoItems.RemoveAll(item => item.IsDone);
+        try
+        {
+            task.IsDone = true;
+            var response = await httpClient.PutAsJsonAsync($"http://localhost:5075/Todo/UpdateTask", task); 
+            response.EnsureSuccessStatusCode();
+        }
+        catch (Exception ex)
+        {
+            message = $"Error updating task status: {ex.Message}";
+        }
     }
+
+    private async Task RemoveTasks()
+    {
+        var response = await httpClient.DeleteAsync($"http://localhost:5075/Todo/RemoveCompletedTasks?username={userStateService.Username}");
+
+        if (response.IsSuccessStatusCode)
+        {
+            TodoItems.RemoveAll(item => item.IsDone); 
+        }
+        else
+        {
+            message = "Failed to remove completed tasks.";
+        }
+    }
+    
     private void SortTasks(MouseEventArgs e)
     {
         TodoItems = TodoItems.OrderBy(task => task.TaskName).ToList();
     }
+
     private void LogOut()
     {
         userStateService.Clear(); 

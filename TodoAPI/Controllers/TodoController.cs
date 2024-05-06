@@ -1,5 +1,6 @@
 ﻿using AutoMapper;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 using TodoAPI.Model;
 using TodoAPI.ViewModel;
 
@@ -52,7 +53,7 @@ namespace TodoAPI.Controllers
             var tasks = _db.Todos.Where(u => u.Username == username).ToList();
             if(tasks == null || !tasks.Any())
             {
-                return NotFound("No task is found");
+                return BadRequest();
             }
             else
             {
@@ -71,6 +72,36 @@ namespace TodoAPI.Controllers
                 return Ok();
             }
             return BadRequest();
+        }
+
+        [HttpPut("UpdateTask")]
+        public IActionResult UpdateTask([FromBody] TodoData updatedTask)
+        {
+            var task = _db.Todos.FirstOrDefault(t => t.TaskName == updatedTask.TaskName);
+
+            if (task == null)
+            {
+                return BadRequest("Task not found."); 
+            }
+
+            task.IsDone = updatedTask.IsDone; 
+            _db.SaveChanges(); 
+
+            return Ok("Task status updated successfully.");
+        }
+
+        [HttpDelete("RemoveCompletedTasks")]
+        public IActionResult RemoveCompletedTasks(string username)
+        {
+            var tasksToRemove = _db.Todos.Where(t => t.Username == username && t.IsDone).ToList();
+
+            if (tasksToRemove.Any())
+            {
+                _db.Todos.RemoveRange(tasksToRemove); 
+                _db.SaveChanges(); 
+                return Ok("Tasks removed successfully.");
+            }
+            return BadRequest("No completed tasks found."); 
         }
     }
 }

@@ -11,6 +11,7 @@ namespace TodoAPI.Model
         public int Id { get; set; }
         public string TaskName { get; set; } = null!;
         public string Username { get; set; } = null!;
+        public bool IsDone { get; set; } = false;
         public DateTime ModifiedAt { get; set; } = DateTime.Now;
         DbSet<User>? Users { get; set; }
     }
