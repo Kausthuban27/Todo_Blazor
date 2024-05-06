@@ -8,7 +8,8 @@ namespace TodoAPI.Helper
     {
         public Mapper() 
         {
-            CreateMap<User, UserData>();
+            CreateMap<UserData, User>();
+            CreateMap<TodoData, Todo>();
         }
     }
 }

@@ -1,6 +1,9 @@
 ﻿@page "/"
 @rendermode InteractiveServer
+@using SharedService
+@inject UserState_Management_Service userStateService
 @inject NavigationManager navigator
+@inject HttpClient httpClient
 
 <PageTitle>Home</PageTitle>
 
@@ -15,7 +18,7 @@
         </div>
         <div class="mb-3">
             <label for="password" class="form-label">Password:</label>
-            <input class="form-control" type="password" id="password" @bind-value=user.Password placeholder="Enter the Password" required />
+            <input class="form-control" type="password" id="password" @bind-value=user.Password placeholder="Enter the Password" min="8" maxlength="15" required />
         </div>
         <button class="btn btn-primary" type="submit">Submit</button>
     </EditForm>
@@ -23,7 +26,10 @@
     @message
 </div>
 
-
+<p class="text-center mt-5">
+    Don't Have An Account? 
+    <NavLink href="signup">Sign Up</NavLink>
+</p>
 
 @code
 {
@@ -32,29 +38,36 @@
         public string Username { get; set; } = "";
         public string Password { get; set; } = "";
     }
+
     string message = "";
     bool IsValid = false;
 
     public User user = new();
-    private void LoginUser()
-    {
-        var username = user.Username;
-        var password = user.Password;
 
-        if (username != null && password != null)
+    private async Task LoginUser()
+    {
+        try
         {
-            if (username == "admin" && password == "123")
+            var res = await httpClient.GetAsync($"http://localhost:5075/Todo/GetUser?username={user.Username}&password={user.Password}");
+            if(res.IsSuccessStatusCode)
             {
-                IsValid = !IsValid;
-                if (navigator != null)
+                message = await res.Content.ReadAsStringAsync();
+                if(navigator != null)
                 {
+                    userStateService.Username = user.Username;
+                    userStateService.IsLoggedIn = true;
+
                     navigator.NavigateTo("/todo");
                 }
-                else
-                {
-                    message = "Hello";
-                }
             }
+            else
+            {
+                message = "Login Failed. Please check the credentials";
+            }
+        }
+        catch(Exception e)
+        {
+            message = $"Error Occurred: {e}";
         }
     }
 }

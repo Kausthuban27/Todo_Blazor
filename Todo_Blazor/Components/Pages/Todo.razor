@@ -1,67 +1,129 @@
 ﻿@page "/todo"
+@using Todo_Blazor.Components.Layout
+@using Todo_Blazor.SharedService
 @rendermode InteractiveServer
+@inject UserState_Management_Service userStateService
+@inject NavigationManager Navigator
+@inject HttpClient httpClient
+@layout TodoLayout
 
 <PageTitle>ToDo App</PageTitle>
 
-<div class="container">
-    <div class="brand-title">TASKS</div>
-    <input @bind="newItem" class="inputs" placeholder="Enter your tasks" />
-    @if (newItem != null)
-    {
-        <button @onclick="AddTasks">Add Task</button>
-    }
 
-    <div>
-        @if (TodoItems.Any())
-        {
-            <table>
-                <thead>
-                    <tr>
-                        <th>Select</th>
-                        <th>Task Name</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    @foreach (var item in TodoItems)
-                    {
+@if(userStateService.IsLoggedIn)
+{
+    <button style="width:5%;float:right;margin-top:-1.5rem;" @onclick="LogOut">Logout</button>
+    <h3 class="text-center">Welcome @userStateService.Username</h3>
+
+    <div class="container text-center">
+        <div class="brand-title">TASKS</div>
+        <input @bind="TaskName" class="inputs" placeholder="Enter your tasks" />
+        
+        <div class="behaviours">
+                <button @onclick="AddTasks">Add Task</button>
+        </div>
+
+        <div>
+            @if (TodoItems.Any())
+            {
+                <table>
+                    <thead>
                         <tr>
-                            <td><input class="form-check-input" type="checkbox" @bind="@item.IsDone" /></td>
-                            <td>@item.TaskName</td>
+                            <th>Select</th>
+                            <th>Task Name</th>
                         </tr>
-                    }
-                </tbody>
-            </table>
-            <div class="behaviours">
-                <button @onclick="RemoveTasks">Remove</button>
-                <button @onclick="SortTasks">Sort</button>
-            </div>
-        }
-        else
-        {
-            <p>No tasks available.</p>
-        }
+                    </thead>
+                    <tbody>
+                        @foreach (var item in TodoItems)
+                        {
+                            <tr>
+                                <td><input class="form-check-input" type="checkbox" @bind="@item.IsDone"/></td>
+                                @foreach(var task in TodoDatas)
+                                {
+                                    <td>@task.TaskName</td>
+                                }
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+                <div class="behaviours">
+                    <button @onclick="RemoveTasks">Remove</button>
+                    <button @onclick="SortTasks">Sort</button>
+                </div>
+            }
+            else
+            {
+                <p>No tasks available.</p>
+            }
+        </div>
     </div>
-</div>
+}
+
 
 @code
 {
     List<TodoList> TodoItems = new List<TodoList>();
-    string newItem = "";
-
+    List<TodoData> TodoDatas = new List<TodoData>();
+    public string message = "";
     public class TodoList
     {
-        public string TaskName { get; set; }
+        public string TaskName { get; set; } = null!;
         public bool IsDone { get; set; }
     }
-
-    private void AddTasks(MouseEventArgs e)
+    public class TodoTasks
     {
-        if (!string.IsNullOrWhiteSpace(newItem))
+        public string TaskName { get; set; } = null!;
+        public string Username { get; set; } = "";
+    }
+    public class TodoData
+    {
+        public int Id { get; set; }
+        public string TaskName { get; set; } = null!;
+        public string Username { get; set; } = null!;
+        public DateTime ModifiedAt { get; set; }
+    }
+
+    public string TaskName { get; set; } = null!;
+    public string Username { get; set; } = "";
+    protected override void OnInitialized()
+    {
+        Username = userStateService.Username; 
+    }
+
+    private async Task GetTask()
+    {
+        try
         {
-            TodoItems.Add(new TodoList { TaskName = newItem });
-            newItem = "";
+            var res = await httpClient.GetFromJsonAsync<List<TodoData>>($"http://localhost:5075/Todo/GetTasks?username={Username}");
+        }
+        catch(Exception e)
+        {
+            message = $"Error Occurred {e}";
         }
     }
+
+
+    private async Task AddTasks()
+    {
+        var TodoTasks = new TodoTasks { TaskName = TaskName, Username = Username};
+        try
+        {
+            var res = await httpClient.PostAsJsonAsync("http://localhost:5075/Todo/AddTasks", TodoTasks);
+            if(res.IsSuccessStatusCode)
+            {
+                TodoItems.Add(new TodoList {TaskName = TaskName});
+            }
+            else
+            {
+                message = "Failed to add task. Please try again.";
+            }
+        }
+        catch(Exception e)
+        {
+            message = $"Error Occured: {e}";
+        }
+    }
+
     private void RemoveTasks(MouseEventArgs e)
     {
         TodoItems.RemoveAll(item => item.IsDone);
@@ -69,5 +131,10 @@
     private void SortTasks(MouseEventArgs e)
     {
         TodoItems = TodoItems.OrderBy(task => task.TaskName).ToList();
+    }
+    private void LogOut()
+    {
+        userStateService.Clear(); 
+        Navigator.NavigateTo("/"); 
     }
 }
