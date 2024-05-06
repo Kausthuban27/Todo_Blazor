@@ -1,0 +1,17 @@
+﻿using Microsoft.EntityFrameworkCore;
+using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
+
+namespace TodoAPI.Model
+{
+    public partial class Todo
+    {
+        [Key]
+        [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
+        public int Id { get; set; }
+        public string TaskName { get; set; } = null!;
+        public string Username { get; set; } = null!;
+        public DateTime ModifiedAt { get; set; } = DateTime.Now;
+        DbSet<User>? Users { get; set; }
+    }
+}
