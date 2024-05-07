@@ -1,6 +1,7 @@
 ﻿@page "/todo"
 @using Todo_Blazor.Components.Layout
 @using Todo_Blazor.SharedService
+@using Todo_Blazor.Model
 @rendermode InteractiveServer
 @inject UserState_Management_Service userStateService
 @inject NavigationManager Navigator
@@ -9,67 +10,32 @@
 
 <PageTitle>ToDo App</PageTitle>
 
+<CascadingValue Value="userStateService">
+    @if(userStateService.IsLoggedIn)
+    {
+        <button style="width:5%;float:right;margin-top:-1.5rem;" @onclick="LogOut">Logout</button>
+        <h3 class="text-center">Welcome @userStateService.Username</h3>
 
-@if(userStateService.IsLoggedIn)
-{
-    <button style="width:5%;float:right;margin-top:-1.5rem;" @onclick="LogOut">Logout</button>
-    <h3 class="text-center">Welcome @userStateService.Username</h3>
-
-    <div class="container text-center">
-        <div class="brand-title">TASKS</div>
-        <input @bind="TaskName" class="inputs" placeholder="Enter your tasks" />
+        <div class="container text-center">
+            <div class="brand-title">TASKS</div>
+            <input @bind="TaskName" class="inputs" placeholder="Enter your tasks" />
         
-        <div class="behaviours">
-                <button @onclick="AddTasks">Add Task</button>
-        </div>
+            <div class="behaviours">
+                    <button @onclick="AddTasks">Add Task</button>
+            </div>
 
-        <div>
-            @if (TodoItems.Any())
-            {
-                <table>
-                    <thead>
-                        <tr>
-                            <th>Select</th>
-                            <th>Task Name</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        @foreach (var item in TodoItems)
-                        {
-                            <tr>
-                                <td><input class="form-check-input" type="checkbox" @bind="@item.IsDone" @bind:event="onchange" @onclick="@(() => UpdateTaskStatus(item))"/></td>
-                                <td>@item.TaskName</td>
-                            </tr>
-                        }
-                    </tbody>
-                </table>
-                <div class="behaviours">
-                    <button @onclick="RemoveTasks">Remove</button>
-                    <button @onclick="SortTasks">Sort</button>
-                </div>
-            }
-            else
-            {
-                <p>No tasks available.</p>
-            }
+            <div>
+                <TodoDisplay TodoItems="TodoItems" OnTaskStatusUpdated="UpdateTaskStatus"/>
+            </div>
         </div>
-    </div>
-}
-
+    }
+</CascadingValue>
 
 @code
 {
     public string TaskName { get; set; } = null!;
-    public class TodoData
-    {
-        public int Id { get; set; }
-        public string TaskName { get; set; } = null!;
-        public string Username { get; set; } = null!;
-        public bool IsDone { get; set; } = false;
-        public DateTime ModifiedAt { get; set; }
-    }
-    string message = "";
-    List<TodoData> TodoItems = new List<TodoData>();
+    public List<TodoData> TodoItems { get; set; } = new();
+    public string message = "";
 
     protected override async Task OnInitializedAsync()
     {
@@ -81,7 +47,7 @@
         try
         {
             var response = await httpClient.GetFromJsonAsync<List<TodoData>>($"http://localhost:5075/Todo/GetTasks?username={userStateService.Username}");
-            TodoItems = response;
+            TodoItems = response!;
         }
         catch(Exception e)
         {
@@ -113,25 +79,6 @@
         {
             message = $"Error updating task status: {ex.Message}";
         }
-    }
-
-    private async Task RemoveTasks()
-    {
-        var response = await httpClient.DeleteAsync($"http://localhost:5075/Todo/RemoveCompletedTasks?username={userStateService.Username}");
-
-        if (response.IsSuccessStatusCode)
-        {
-            TodoItems.RemoveAll(item => item.IsDone); 
-        }
-        else
-        {
-            message = "Failed to remove completed tasks.";
-        }
-    }
-    
-    private void SortTasks(MouseEventArgs e)
-    {
-        TodoItems = TodoItems.OrderBy(task => task.TaskName).ToList();
     }
 
     private void LogOut()

@@ -62,7 +62,7 @@ namespace TodoAPI.Controllers
         }
 
         [HttpPost("AddTasks")]
-        public IActionResult AddTasks(TodoData todoData)
+        public IActionResult AddTasks(ViewModel.TodoData todoData)
         {
             var task = _map.Map<Todo>(todoData);
             if(todoData != null)
@@ -75,7 +75,7 @@ namespace TodoAPI.Controllers
         }
 
         [HttpPut("UpdateTask")]
-        public IActionResult UpdateTask([FromBody] TodoData updatedTask)
+        public IActionResult UpdateTask([FromBody] ViewModel.TodoData updatedTask)
         {
             var task = _db.Todos.FirstOrDefault(t => t.TaskName == updatedTask.TaskName);
 

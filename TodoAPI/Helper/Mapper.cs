@@ -9,7 +9,7 @@ namespace TodoAPI.Helper
         public Mapper() 
         {
             CreateMap<UserData, User>();
-            CreateMap<TodoData, Todo>();
+            CreateMap<ViewModel.TodoData, Todo>();
         }
     }
 }
