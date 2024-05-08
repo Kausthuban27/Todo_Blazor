@@ -1,0 +1,57 @@
+﻿@page "/signup"
+@rendermode InteractiveServer
+@using Todo_Blazor.Model
+@using Todo_Blazor.SharedService
+@inject NavigationManager navigator
+@inject UserService UserService
+
+<PageTitle>Sign Up</PageTitle>
+<h3>Register</h3>
+
+<div class="form-container" align="center">
+    <EditForm Model="userDetails" FormName="SignUpForm" class="form-group w-50" OnSubmit="RegisterUser">
+        <div class="mb-3">
+            <label class="form-label" for="firstname">FirstName</label>
+            <input type="text" class="form-control" id="firstname" @bind-value="userDetails.FirstName" placeholder="Enter the FirstName" />
+        </div>
+        <div class="mb-3">
+            <label class="form-label" for="lastname">LastName</label>
+            <input type="text" class="form-control" id="lastname" @bind-value="userDetails.LastName" placeholder="Enter the LasName" />
+        </div>
+        <div class="mb-3">
+            <label class="form-label" for="username">UserName</label>
+            <input type="text" class="form-control" id="username" @bind-value="userDetails.Username" placeholder="Enter the UserName" />
+        </div>
+        <div class="mb-3">
+            <label class="form-label" for="password">Password</label>
+            <input type="password" class="form-control" id="password" @bind-value="userDetails.Password" placeholder="Enter the Password" />
+        </div>
+        <button type="submit" class="btn btn-primary">Submit</button>
+    </EditForm>
+    <p class="text-center mt-3">@message</p>
+</div>
+@code {
+    public User userDetails { get; set; } = new();
+    public string message = "";
+
+    private async Task RegisterUser()
+    {
+        try
+        {
+            var res = await UserService.RegisterUserAsync(userDetails);
+            if(res)
+            {
+                message = "Successfully Added";
+                navigator.NavigateTo("/");
+            }
+            else
+            {
+                message = $"Error Occured {res}";
+            }
+        }
+        catch(Exception)
+        {
+            throw;
+        }
+    }
+}

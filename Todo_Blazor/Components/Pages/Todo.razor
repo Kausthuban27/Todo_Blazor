@@ -2,8 +2,10 @@
 @using Todo_Blazor.Components.Layout
 @using Todo_Blazor.SharedService
 @using Todo_Blazor.Model
+@using System.Web
 @rendermode InteractiveServer
 @inject UserState_Management_Service userStateService
+@inject TodoService TodoService
 @inject NavigationManager Navigator
 @inject HttpClient httpClient
 @layout TodoLayout
@@ -25,7 +27,7 @@
             </div>
 
             <div>
-                <TodoDisplay TodoItems="TodoItems" OnTaskStatusUpdated="UpdateTaskStatus"/>
+                <TodoDisplay TodoItems="TodoItems" OnTaskStatusUpdated="UpdateTaskStatus" />
             </div>
         </div>
     }
@@ -46,8 +48,7 @@
     {
         try
         {
-            var response = await httpClient.GetFromJsonAsync<List<TodoData>>($"http://localhost:5075/Todo/GetTasks?username={userStateService.Username}");
-            TodoItems = response!;
+            TodoItems = await TodoService.GetTasksAsync();
         }
         catch(Exception e)
         {
@@ -59,8 +60,8 @@
     private async Task AddTasks()
     {
         var newTask = new TodoData { TaskName = TaskName, Username = userStateService.Username };
-        var response = await httpClient.PostAsJsonAsync("http://localhost:5075/Todo/AddTasks", newTask);
-        if (response.IsSuccessStatusCode)
+        var res = await TodoService.AddTasksAsync(newTask);
+        if (res)
         {
             TodoItems.Add(newTask);
             TaskName = ""; 
@@ -71,9 +72,13 @@
     {
         try
         {
-            task.IsDone = true;
-            var response = await httpClient.PutAsJsonAsync($"http://localhost:5075/Todo/UpdateTask", task); 
-            response.EnsureSuccessStatusCode();
+            task.IsDone = !task.IsDone;
+            var res = await TodoService.UpdateTask(task); 
+            if(res)
+            {
+                message = "Successfully Updated";
+                message = "";
+            }
         }
         catch (Exception ex)
         {

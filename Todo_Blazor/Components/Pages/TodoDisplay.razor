@@ -1,7 +1,7 @@
 ﻿@page "/tododisplay"
 @using Todo_Blazor.Model
 @using Todo_Blazor.SharedService
-@inject HttpClient httpClient
+@inject TodoService TodoService
 
 @if (TodoItems.Any())
 {
@@ -53,9 +53,9 @@ else
 
     private async Task RemoveTasks()
     {
-        var response = await httpClient.DeleteAsync($"http://localhost:5075/Todo/RemoveCompletedTasks?username={userStateService.Username}");
+        var response = await TodoService.DeleteAsync();
 
-        if (response.IsSuccessStatusCode)
+        if (response)
         {
             TodoItems.RemoveAll(item => item.IsDone);
         }

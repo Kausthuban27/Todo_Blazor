@@ -1,6 +1,7 @@
 ﻿using AutoMapper;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using Todo_Blazor.SharedService;
 using TodoAPI.Model;
 using TodoAPI.ViewModel;
 
@@ -62,7 +63,7 @@ namespace TodoAPI.Controllers
         }
 
         [HttpPost("AddTasks")]
-        public IActionResult AddTasks(ViewModel.TodoData todoData)
+        public IActionResult AddTasks(TodoData todoData)
         {
             var task = _map.Map<Todo>(todoData);
             if(todoData != null)
@@ -75,7 +76,7 @@ namespace TodoAPI.Controllers
         }
 
         [HttpPut("UpdateTask")]
-        public IActionResult UpdateTask([FromBody] ViewModel.TodoData updatedTask)
+        public IActionResult UpdateTask(Todo updatedTask)
         {
             var task = _db.Todos.FirstOrDefault(t => t.TaskName == updatedTask.TaskName);
 
