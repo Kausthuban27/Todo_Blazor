@@ -18,7 +18,7 @@ namespace TodoAPI.Services
         public bool AddTodoTasks(TodoData todos)
         {
             var task = _map.Map<Todo>(todos);
-            if (todos != null)
+            if (task != null)
             {
                 _db.Todos.Add(task);
                 return true;
@@ -52,13 +52,20 @@ namespace TodoAPI.Services
 
         public bool UpdateTodoTasks(Todo todos)
         {
-            var task = _db.Todos.FirstOrDefault(t => t.TaskName == todos.TaskName);
-            if(task == null)
+            if (todos == null || _db.Todos == null)
             {
                 return false;
             }
-            task.IsDone = todos.IsDone;
-            return true;
+            else
+            {
+                var task = _db.Todos.FirstOrDefault(t => t.TaskName == todos.TaskName);
+                if (task == null)
+                {
+                    return false;
+                }
+                task.IsDone = todos.IsDone;
+                return true;
+            }
         }
 
         public void SaveChanges()

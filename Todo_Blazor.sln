@@ -7,6 +7,8 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Todo_Blazor", "Todo_Blazor\
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "TodoAPI", "TodoAPI\TodoAPI.csproj", "{93F589BB-1D07-4FDC-87C9-534DE446CFA9}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "UnitTest_TodoAPI", "UnitTest_TodoAPI\UnitTest_TodoAPI.csproj", "{41A50CF2-7478-4168-AEC7-44F20DDBF8DC}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -21,6 +23,10 @@ Global
 		{93F589BB-1D07-4FDC-87C9-534DE446CFA9}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{93F589BB-1D07-4FDC-87C9-534DE446CFA9}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{93F589BB-1D07-4FDC-87C9-534DE446CFA9}.Release|Any CPU.Build.0 = Release|Any CPU
+		{41A50CF2-7478-4168-AEC7-44F20DDBF8DC}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{41A50CF2-7478-4168-AEC7-44F20DDBF8DC}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{41A50CF2-7478-4168-AEC7-44F20DDBF8DC}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{41A50CF2-7478-4168-AEC7-44F20DDBF8DC}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

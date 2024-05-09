@@ -19,7 +19,7 @@ namespace TodoAPI.Services
         public bool AddUser(UserData user)
         {
             var userDetails = _map.Map<User>(user);
-            if(user != null)
+            if(userDetails != null)
             {
                 var userData = _db.Users.Where(u => u.Username == userDetails.Username);
                 if(!userData.Any())

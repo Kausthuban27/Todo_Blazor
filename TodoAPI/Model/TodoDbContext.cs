@@ -12,8 +12,8 @@ namespace TodoAPI.Model
         {
         }
 
-        public DbSet<User> Users { get; set; }
-        public DbSet<Todo> Todos { get; set; }
+        public virtual DbSet<User> Users { get; set; }
+        public virtual DbSet<Todo> Todos { get; set; }
 
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {
