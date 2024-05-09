@@ -3,15 +3,20 @@ using Todo_Blazor.SharedService;
 
 var builder = WebApplication.CreateBuilder(args);
 
-var baseUrl = builder.Configuration["ApiUrl:baseUrl"];
+var todoBaseUrl = builder.Configuration["ApiUrl:todoBaseUrl"]!;
+var userBaseUrl = builder.Configuration["ApiUrl:userBaseUrl"]!;
 // Add services to the container.
 builder.Services.AddRazorComponents()
     .AddInteractiveServerComponents();
 builder.Services.AddSingleton<UserState_Management_Service>();
-builder.Services.AddHttpClient();
-builder.Services.AddScoped(c => new HttpClient
+builder.Services.AddHttpClient("TodoHttpClient", client =>
 {
-    BaseAddress = new Uri(baseUrl!)
+    client.BaseAddress = new Uri(todoBaseUrl);
+});
+
+builder.Services.AddHttpClient("UserHttpClient", client =>
+{
+    client.BaseAddress = new Uri(userBaseUrl);
 });
 
 builder.Services.AddScoped<UserState_Management_Service>();

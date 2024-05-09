@@ -6,19 +6,19 @@ namespace Todo_Blazor.SharedService
 {
     public class UserService
     {
-        private readonly HttpClient _httpClient;
+        private readonly HttpClient _userHttpClient;
         private readonly UserState_Management_Service _userStateService;
 
-        public UserService(HttpClient httpClient, UserState_Management_Service userStateService)
+        public UserService(IHttpClientFactory httpClientFactory, UserState_Management_Service userStateService)
         {
-            _httpClient = httpClient;
+            _userHttpClient = httpClientFactory.CreateClient("UserHttpClient");
             _userStateService = userStateService;
         }
         public async Task<bool> LoginUserAsync(string username, string password)
         {
             try
             {
-                var baseUri = _httpClient.BaseAddress!.ToString();
+                var baseUri = _userHttpClient.BaseAddress!.ToString();
                 if (!baseUri.EndsWith("/"))
                 {
                     baseUri += "/";
@@ -34,7 +34,7 @@ namespace Todo_Blazor.SharedService
                 };
 
                 uriBuilder.Query = queryBuilder.ToString();
-                var response = await _httpClient.GetAsync(uriBuilder.Uri);
+                var response = await _userHttpClient.GetAsync(uriBuilder.Uri);
                 response.EnsureSuccessStatusCode();
                 return true;
             }
@@ -48,7 +48,7 @@ namespace Todo_Blazor.SharedService
         {
             try
             {
-                var baseUri = _httpClient.BaseAddress!.ToString();
+                var baseUri = _userHttpClient.BaseAddress!.ToString();
                 if (!baseUri.EndsWith("/"))
                 {
                     baseUri += "/";
@@ -57,7 +57,7 @@ namespace Todo_Blazor.SharedService
                 UriBuilder uriBuilder = new UriBuilder(baseUri);
                 uriBuilder.Path += "AddUser";
 
-                var response = await _httpClient.PostAsJsonAsync(uriBuilder.Uri, user);
+                var response = await _userHttpClient.PostAsJsonAsync(uriBuilder.Uri, user);
                 response.EnsureSuccessStatusCode();
                 return true;
             }

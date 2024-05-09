@@ -6,12 +6,12 @@ namespace Todo_Blazor.SharedService
 {
     public class TodoService
     {
-        private readonly HttpClient _httpClient;
+        private readonly HttpClient _todoHttpClient;
         private readonly UserState_Management_Service _userStateService;
 
-        public TodoService(HttpClient httpClient, UserState_Management_Service userStateService)
+        public TodoService(IHttpClientFactory httpClientFactory, UserState_Management_Service userStateService)
         {
-            _httpClient = httpClient;
+            _todoHttpClient = httpClientFactory.CreateClient("TodoHttpClient");
             _userStateService = userStateService;
         }
 
@@ -19,7 +19,7 @@ namespace Todo_Blazor.SharedService
         {
             try
             {
-                var baseUri = _httpClient.BaseAddress!.ToString();
+                var baseUri = _todoHttpClient.BaseAddress!.ToString();
                 if (!baseUri.EndsWith("/"))
                 {
                     baseUri += "/";
@@ -31,7 +31,7 @@ namespace Todo_Blazor.SharedService
                 var queryParams = HttpUtility.ParseQueryString(uriBuilder.Query);
                 queryParams["username"] = _userStateService.Username;
                 uriBuilder.Query = queryParams.ToString();
-                var response = await _httpClient.GetFromJsonAsync<List<TodoData>>(uriBuilder.Uri);
+                var response = await _todoHttpClient.GetFromJsonAsync<List<TodoData>>(uriBuilder.Uri);
                 return response!;
             }
             catch (Exception)
@@ -44,7 +44,7 @@ namespace Todo_Blazor.SharedService
         {
             try
             {
-                var baseUri = _httpClient.BaseAddress!.ToString();
+                var baseUri = _todoHttpClient.BaseAddress!.ToString();
                 if (!baseUri.EndsWith("/"))
                 {
                     baseUri += "/";
@@ -53,7 +53,7 @@ namespace Todo_Blazor.SharedService
                 UriBuilder uriBuilder = new UriBuilder(baseUri);
                 uriBuilder.Path += "AddTasks";
 
-                var response = await _httpClient.PostAsJsonAsync(uriBuilder.Uri, todoData);
+                var response = await _todoHttpClient.PostAsJsonAsync(uriBuilder.Uri, todoData);
                 response.EnsureSuccessStatusCode();
                 return true;
             }
@@ -67,7 +67,7 @@ namespace Todo_Blazor.SharedService
         {
             try
             {
-                var baseUri = _httpClient.BaseAddress!.ToString();
+                var baseUri = _todoHttpClient.BaseAddress!.ToString();
                 if (!baseUri.EndsWith("/"))
                 {
                     baseUri += "/";
@@ -76,7 +76,7 @@ namespace Todo_Blazor.SharedService
                 UriBuilder uriBuilder = new UriBuilder(baseUri);
                 uriBuilder.Path += "UpdateTask";
 
-                var response = await _httpClient.PutAsJsonAsync(uriBuilder.Uri, todoData);
+                var response = await _todoHttpClient.PutAsJsonAsync(uriBuilder.Uri, todoData);
                 response.EnsureSuccessStatusCode();
                 return true;
             }
@@ -90,7 +90,7 @@ namespace Todo_Blazor.SharedService
         {
             try
             {
-                var baseUri = _httpClient.BaseAddress!.ToString();
+                var baseUri = _todoHttpClient.BaseAddress!.ToString();
                 if (!baseUri.EndsWith("/"))
                 {
                     baseUri += "/";
@@ -102,7 +102,7 @@ namespace Todo_Blazor.SharedService
                 var queryParams = HttpUtility.ParseQueryString(uriBuilder.Query);
                 queryParams["username"] = _userStateService.Username;
                 uriBuilder.Query = queryParams.ToString();
-                var response = await _httpClient.DeleteAsync(uriBuilder.Uri);
+                var response = await _todoHttpClient.DeleteAsync(uriBuilder.Uri);
                 return true;
             }
             catch (Exception)

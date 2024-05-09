@@ -1,5 +1,7 @@
 using TodoAPI.Model;
 using AutoMapper;
+using TodoAPI.Interface;
+using TodoAPI.Services;
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
@@ -10,6 +12,8 @@ builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 builder.Services.AddDbContext<TodoDbContext>();
 builder.Services.AddAutoMapper(AppDomain.CurrentDomain.GetAssemblies());
+builder.Services.AddScoped<IUser, UserService>();
+builder.Services.AddScoped<ITodo, TodoService>();
 
 var app = builder.Build();
 
